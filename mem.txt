@@ -1,0 +1,105 @@
+ZX81 Memory Map and System Area
+
+  0000-1FFF   BIOS ROM (8KBytes)
+  2000-3FFF   not used
+  4000-43FF   Internal RAM (1 KByte)
+  4000-7FFF   External RAM (16 KBytes)
+
+ZX81 RAM Map
+
+  4000      System Area (see below)
+  407D      BASIC Program
+  D_FILE    Video Memory (BG Map)
+  VARS      BASIC Variables
+  E_LINE-1  Byte 80h
+  E_LINE    Input Buffer/Workspace
+  STKBOT    BASIC Calculator Stack
+  STKEND    Machine Stack/Free Memory
+  SP        Machine Stack/In Use (SP is meant to be the CPUs SP register)
+  ERR_SP    GOSUB Stack
+  RAMTOP    USR Programs (Begin of unused/reserved memory)
+
+ZX81 System Area
+
+  Addr.  Name    Expl
+  4000   ERR_NR  Errorcode-1
+  4001   FLAGS   Various BASIC Control flags
+           Bit0=used (purpose unknown)
+           Bit1=Redirect Output to printer
+           Bit2=used (purpose unknown)
+           Bit3-5=not used
+           Bit6=used (purpose unknown)
+           Bit7=used (purpose unknown)
+  4002   ERR_SP  Pointer to top of Machine Stack / Bottom of GOSUB Stack
+  4004   RAMTOP  Pointer to unused/free memory (Changes realized
+                   at next NEW or CLS)
+  4006   MODE    Selects [K], [L], [F], or [G] Cursor
+  4007   PPC     Line Number of most recently executed BASIC line
+  ---Begin of Save Area---
+  4009   VERSN   Should be 00h to identify ZX81 cassette files (FFh=Lambda)
+  400A   E_PPC   Line Number of currently selected line [>] Cursor
+  400C   D_File  Pointer to Video Memory (BG Map) / End of Basic Program
+  400E   DF_CC   Pointer to VRAM Address for PRINT
+  4010   VARS    Pointer to BASIC Variables Area
+  4012   DEST    Pointer to Variable when assigning a value to it
+  4014   E_LINE  Pointer to Input Buffer/Workspace, and to --End of Save Area--
+  4016   CH_ADD  Pointer to next interpreted character
+  4018   X_PTR   Pointer to character prior to [S] Symbol (=Syntax Error) (or
+                   ptr to aborted/breaked line)
+  401A   STKBOT  Pointer to BASIC Calculator Stack / End of
+                   Input Buffer/Workspace
+  401C   STKEND  Pointer to bottom of Machine Stack / End of Calculator Stack
+  401E   BERG    Calculator B-Register
+  401F   MEM     Pointer to Calculator Memory (usually same as MEMBOT)
+  4021   -       Not used
+  4022   DF_SZ   Number of lines in lower display section (including 1 blank
+                   line)
+  4023   S_TOP   Line Number of first line for automatic LISTing
+  4025   LAST_K  Keyboard - Recently pressed key (4025=row, 4026=shift/column)
+  4027   DEBOUN  Keyboard - Debounce State (key release delay)
+  4028   MARGIN  Vertical Border Height (55 lines at top/bottom for 50Hz,
+                   31 for 60Hz)
+  4029   NXTLIN  Address of next BASIC line which is to be executed,
+                   pointing to a byte >=40h when stopped, indicates
+                   autostart address in cassette files.
+  402B   OLDPPC  Line Number for CONT
+  402D   FLAGX   Various Flags
+                   Bit0   used (purpose unknown)
+                   Bit1   used (purpose unknown)
+                   Bit2-4 not used
+                   Bit5   used (purpose unknown)
+                   Bit6   used (purpose unknown)
+                   Bit7   not used
+  402E   STRLEN  Length of string during assignment
+  4030   T_ADDR  Pointer to next item in Syntax Table (or INPUT's old S_POSN)
+  4032   SEED    Random Number Seed
+  4034   FRAMES  Decrementing Video Frame Counter (Bit15: 0=PAUSE, ie.
+                   display ON, program PAUSEd)
+  4036   COORDS  X-Coordinate of last PLOT, Y-Coordinate of last PLOT
+  4038   PR_CC   Least significant byte of PRBUFF printer buffer pointer
+  4039   S_POSN  X-Coordinate for PRINT, Y-Coordinate for PRINT
+  403B   CDFLAG  Various Flags
+                  Bit7: Current Speed (1=SLOW (Display Enable), 0=FAST)
+                  Bit6: Requested Speed (or old speed during
+                    pause/cassette io, etc)
+                  Bit5-1: Not used
+                  Bit0: Keystroke (0=None, 1=Yes)
+  403C   PRBUFF  Printer Buffer 32 characters + NEWLINE (76h)
+  405D   MEMBOT  Default workspace for BASIC Calculator
+  407B   -       Not used (2 bytes)
+
+ ZX80/ZX81 Cassette File Images
+
+.81 and .80 Files
+These are 1:1 copies of the content of real ZX81 and ZX80 cassette files.
+ZX81 files are copies of the memory area 4009h up to E_LINE-1, the filename (which is usually part of ZX81 files) is not included in the file.
+ZX80 files are copies of the memory area 4000h up to E_LINE-1, the filename is obviously not included as real ZX80 files do not have names.
+
+.P and .O Files
+Basically, these are identical as .81 (.P) and .80 (.O) files, except that an unpredictable amount of garbage is meant to be attached to each file.
+Older versions of the Xtender emulator seem to have attached 1 byte of garbage. The current Xtender version apparently dropped this behaviour, and saves correct length. Files at ftp.nvg randomly contain between 28-38 bytes of garbage, probably caused by a cassette-to-disk transfer program. And some files appear to have went through a CP/M filesystem, which caused the length to be rounded up to multiples of 128 bytes.
+Programs that deal with these files should determine the correct length (by examining the header/system area), and truncate the extra bytes.
+
+.P Files with Filename
+Some .P files contain the original "FILENAME.P" (in ZX81 charset) at 003Fh (within the PRBUFF area) (the purpose is probably to "preserve" long filenames in MSDOS) (the preceeding bytes at 003Ch are usually 00-1A-1C, or in FROGGER-HR: 00-1C-1C (unknown purpose)).
+
